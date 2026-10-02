@@ -44,110 +44,117 @@ def clean_text(text):
 
 def generate_pdf_report(result):
     """Generates a professional, beautifully formatted PDF report safely."""
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_auto_page_break(auto=True, margin=15)
-    
-    # Header Banner Style
-    pdf.set_fill_color(30, 41, 59)  # Dark slate blue
-    pdf.rect(0, 0, 210, 25, 'F')
-    
-    pdf.set_font("Arial", "B", 16)
-    pdf.set_text_color(255, 255, 255)
-    pdf.set_xy(10, 8)
-    pdf.cell(190, 10, clean_text("CareerLens AI - Professional Upskilling Report"), ln=True, align="C")
-    
-    # Reset text color to dark
-    pdf.set_text_color(15, 23, 42)
-    pdf.ln(15)
-    
-    # Match Score Box
-    match_pct = (
-        result.get("match_percentage") 
-        or result.get("match_score") 
-        or result.get("percentage") 
-        or 0
-    )
-    pdf.set_font("Arial", "B", 12)
-    pdf.set_fill_color(241, 245, 249)
-    pdf.set_x(10)
-    pdf.cell(190, 10, clean_text(f"  Resume Match Score: {match_pct}%"), ln=True, fill=True)
-    pdf.ln(5)
-    
-    # Core Strengths Section
-    pdf.set_font("Arial", "B", 12)
-    pdf.set_text_color(15, 118, 110)
-    pdf.set_x(10)
-    pdf.cell(190, 8, clean_text("Core Strengths"), ln=True)
-    pdf.set_font("Arial", "", 10)
-    pdf.set_text_color(15, 23, 42)
-    
-    strengths = result.get("core_strengths") or result.get("strengths") or []
-    for s in strengths:
-        pdf.set_x(15)
-        pdf.multi_cell(185, 6, clean_text(f"[+] {s}"))
-    pdf.ln(4)
-    
-    # Critical Gaps Section
-    pdf.set_font("Arial", "B", 12)
-    pdf.set_text_color(185, 28, 28)
-    pdf.set_x(10)
-    pdf.cell(190, 8, clean_text("Critical Gaps"), ln=True)
-    pdf.set_font("Arial", "", 10)
-    pdf.set_text_color(15, 23, 42)
-    
-    gaps = result.get("critical_gaps") or result.get("gaps") or []
-    for g in gaps:
-        pdf.set_x(15)
-        pdf.multi_cell(185, 6, clean_text(f"[!] {g}"))
-    pdf.ln(4)
-    
-    # Week-by-Week Roadmap Section
-    pdf.set_font("Arial", "B", 12)
-    pdf.set_text_color(30, 64, 175)
-    pdf.set_x(10)
-    pdf.cell(190, 8, clean_text("Week-by-Week Upskilling Roadmap"), ln=True)
-    pdf.set_text_color(15, 23, 42)
-    
-    roadmap = result.get("upskilling_roadmap") or result.get("roadmap") or []
-    for week_item in roadmap:
-        w_num = week_item.get('week') or week_item.get('week_number') or "1"
-        focus = week_item.get('focus_area') or week_item.get('focus') or "General"
+    try:
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_auto_page_break(auto=True, margin=15)
         
-        pdf.set_font("Arial", "B", 10)
+        # Header Banner Style
+        pdf.set_fill_color(30, 41, 59)  # Dark slate blue
+        pdf.rect(0, 0, 210, 25, 'F')
+        
+        pdf.set_font("Arial", "B", 16)
+        pdf.set_text_color(255, 255, 255)
+        pdf.set_xy(10, 8)
+        pdf.cell(190, 10, clean_text("CareerLens AI - Professional Upskilling Report"), ln=True, align="C")
+        
+        # Reset text color to dark
+        pdf.set_text_color(15, 23, 42)
+        pdf.ln(15)
+        
+        # Match Score Box
+        match_pct = (
+            result.get("match_percentage") 
+            or result.get("match_score") 
+            or result.get("percentage") 
+            or 0
+        )
+        pdf.set_font("Arial", "B", 12)
+        pdf.set_fill_color(241, 245, 249)
         pdf.set_x(10)
-        pdf.cell(190, 6, clean_text(f"Week {w_num}: {focus}"), ln=True)
+        pdf.cell(190, 10, clean_text(f"  Resume Match Score: {match_pct}%"), ln=True, fill=True)
+        pdf.ln(5)
         
-        pdf.set_font("Arial", "B", 9)
-        pdf.set_x(15)
-        pdf.cell(185, 5, clean_text("Actionable Tasks:"), ln=True)
-        pdf.set_font("Arial", "", 9)
-        for task in week_item.get("actionable_tasks", []) or week_item.get("tasks", []):
-            pdf.set_x(20)
-            pdf.multi_cell(180, 5, clean_text(f"- {task}"))
+        # Core Strengths Section
+        pdf.set_font("Arial", "B", 12)
+        pdf.set_text_color(15, 118, 110)
+        pdf.set_x(10)
+        pdf.cell(190, 8, clean_text("Core Strengths"), ln=True)
+        pdf.set_font("Arial", "", 10)
+        pdf.set_text_color(15, 23, 42)
+        
+        strengths = result.get("core_strengths") or result.get("strengths") or []
+        for s in strengths:
+            pdf.set_x(15)
+            pdf.multi_cell(185, 6, clean_text(f"[+] {s}"))
+        pdf.ln(4)
+        
+        # Critical Gaps Section
+        pdf.set_font("Arial", "B", 12)
+        pdf.set_text_color(185, 28, 28)
+        pdf.set_x(10)
+        pdf.cell(190, 8, clean_text("Critical Gaps"), ln=True)
+        pdf.set_font("Arial", "", 10)
+        pdf.set_text_color(15, 23, 42)
+        
+        gaps = result.get("critical_gaps") or result.get("gaps") or []
+        for g in gaps:
+            pdf.set_x(15)
+            pdf.multi_cell(185, 6, clean_text(f"[!] {g}"))
+        pdf.ln(4)
+        
+        # Week-by-Week Roadmap Section
+        pdf.set_font("Arial", "B", 12)
+        pdf.set_text_color(30, 64, 175)
+        pdf.set_x(10)
+        pdf.cell(190, 8, clean_text("Week-by-Week Upskilling Roadmap"), ln=True)
+        pdf.set_text_color(15, 23, 42)
+        
+        roadmap = result.get("upskilling_roadmap") or result.get("roadmap") or []
+        for week_item in roadmap:
+            w_num = week_item.get('week') or week_item.get('week_number') or "1"
+            focus = week_item.get('focus_area') or week_item.get('focus') or "General"
             
-        pdf.set_font("Arial", "B", 9)
-        pdf.set_x(15)
-        pdf.cell(185, 5, clean_text("Suggested Resources:"), ln=True)
-        pdf.set_font("Arial", "", 9)
-        for res in week_item.get("suggested_resources", []) or week_item.get("resources", []):
-            pdf.set_x(20)
-            pdf.multi_cell(180, 5, clean_text(f"- {res}"))
-        pdf.ln(3)
+            pdf.set_font("Arial", "B", 10)
+            pdf.set_x(10)
+            pdf.cell(190, 6, clean_text(f"Week {w_num}: {focus}"), ln=True)
+            
+            pdf.set_font("Arial", "B", 9)
+            pdf.set_x(15)
+            pdf.cell(185, 5, clean_text("Actionable Tasks:"), ln=True)
+            pdf.set_font("Arial", "", 9)
+            for task in week_item.get("actionable_tasks", []) or week_item.get("tasks", []):
+                pdf.set_x(20)
+                pdf.multi_cell(180, 5, clean_text(f"- {task}"))
+                
+            pdf.set_font("Arial", "B", 9)
+            pdf.set_x(15)
+            pdf.cell(185, 5, clean_text("Suggested Resources:"), ln=True)
+            pdf.set_font("Arial", "", 9)
+            for res in week_item.get("suggested_resources", []) or week_item.get("resources", []):
+                pdf.set_x(20)
+                pdf.multi_cell(180, 5, clean_text(f"- {res}"))
+            pdf.ln(3)
+            
+        # Recruiter Tip Section
+        pdf.set_font("Arial", "B", 11)
+        pdf.set_text_color(113, 63, 18)
+        pdf.set_x(10)
+        pdf.cell(190, 8, clean_text("Recruiter Tip"), ln=True)
+        pdf.set_font("Arial", "", 10)
+        pdf.set_text_color(15, 23, 42)
         
-    # Recruiter Tip Section
-    pdf.set_font("Arial", "B", 11)
-    pdf.set_text_color(113, 63, 18)
-    pdf.set_x(10)
-    pdf.cell(190, 8, clean_text("Recruiter Tip"), ln=True)
-    pdf.set_font("Arial", "", 10)
-    pdf.set_text_color(15, 23, 42)
-    
-    tip = result.get("interview_tip") or result.get("tip") or "Highlight transferable skills."
-    pdf.set_x(15)
-    pdf.multi_cell(185, 6, clean_text(tip))
-    
-    return pdf.output()
+        tip = result.get("interview_tip") or result.get("tip") or "Highlight transferable skills."
+        pdf.set_x(15)
+        pdf.multi_cell(185, 6, clean_text(tip))
+        
+        output = pdf.output()
+        if isinstance(output, str):
+            return output.encode('latin1', errors='replace')
+        return bytes(output)
+    except Exception as e:
+        st.error(f"Error generating PDF report: {e}")
+        return None
 
 def analyze_resume(resume_text, job_description):
     """Sends the resume and JD to Groq using our prompt architecture."""
@@ -279,11 +286,12 @@ if st.button("Generate Upskilling Roadmap 🚀", type="primary"):
                 )
                 st.info(f"💡 **Recruiter Tip:** {tip}")
                 
-                # Generate and offer PDF download button
+                # Generate and offer PDF download button safely
                 pdf_bytes = generate_pdf_report(result)
-                st.download_button(
-                    label="📥 Download Roadmap as PDF Report",
-                    data=pdf_bytes,
-                    file_name="career_lens_roadmap.pdf",
-                    mime="application/pdf"
-                )
+                if pdf_bytes:
+                    st.download_button(
+                        label="📥 Download Roadmap as PDF Report",
+                        data=pdf_bytes,
+                        file_name="career_lens_roadmap.pdf",
+                        mime="application/pdf"
+                    )
