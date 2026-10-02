@@ -69,38 +69,44 @@ def generate_pdf_report(result):
         or 0
     )
     pdf.set_font("Arial", "B", 12)
-    pdf.set_fill_color(241, 245, 249)  # Light grey-blue container
-    pdf.cell(0, 10, clean_text(f"  Resume Match Score: {match_pct}%"), ln=True, fill=True)
+    pdf.set_fill_color(241, 245, 249)
+    pdf.set_x(10)
+    pdf.cell(190, 10, clean_text(f"  Resume Match Score: {match_pct}%"), ln=True, fill=True)
     pdf.ln(5)
     
     # Core Strengths Section
     pdf.set_font("Arial", "B", 12)
-    pdf.set_text_color(15, 118, 110)  # Teal accent
-    pdf.cell(0, 8, clean_text("Core Strengths"), ln=True)
+    pdf.set_text_color(15, 118, 110)
+    pdf.set_x(10)
+    pdf.cell(190, 8, clean_text("Core Strengths"), ln=True)
     pdf.set_font("Arial", "", 10)
     pdf.set_text_color(15, 23, 42)
     
     strengths = result.get("core_strengths") or result.get("strengths") or []
     for s in strengths:
-        pdf.multi_cell(0, 6, clean_text(f"  [+] {s}"))
+        pdf.set_x(15)
+        pdf.multi_cell(185, 6, clean_text(f"[+] {s}"))
     pdf.ln(4)
     
     # Critical Gaps Section
     pdf.set_font("Arial", "B", 12)
-    pdf.set_text_color(185, 28, 28)  # Coral red accent
-    pdf.cell(0, 8, clean_text("Critical Gaps"), ln=True)
+    pdf.set_text_color(185, 28, 28)
+    pdf.set_x(10)
+    pdf.cell(190, 8, clean_text("Critical Gaps"), ln=True)
     pdf.set_font("Arial", "", 10)
     pdf.set_text_color(15, 23, 42)
     
     gaps = result.get("critical_gaps") or result.get("gaps") or []
     for g in gaps:
-        pdf.multi_cell(0, 6, clean_text(f"  [!] {g}"))
+        pdf.set_x(15)
+        pdf.multi_cell(185, 6, clean_text(f"[!] {g}"))
     pdf.ln(4)
     
     # Week-by-Week Roadmap Section
     pdf.set_font("Arial", "B", 12)
-    pdf.set_text_color(30, 64, 175)  # Royal blue accent
-    pdf.cell(0, 8, clean_text("Week-by-Week Upskilling Roadmap"), ln=True)
+    pdf.set_text_color(30, 64, 175)
+    pdf.set_x(10)
+    pdf.cell(190, 8, clean_text("Week-by-Week Upskilling Roadmap"), ln=True)
     pdf.set_text_color(15, 23, 42)
     
     roadmap = result.get("upskilling_roadmap") or result.get("roadmap") or []
@@ -109,30 +115,37 @@ def generate_pdf_report(result):
         focus = week_item.get('focus_area') or week_item.get('focus') or "General"
         
         pdf.set_font("Arial", "B", 10)
-        pdf.cell(0, 6, clean_text(f"Week {w_num}: {focus}"), ln=True)
+        pdf.set_x(10)
+        pdf.cell(190, 6, clean_text(f"Week {w_num}: {focus}"), ln=True)
         
         pdf.set_font("Arial", "B", 9)
-        pdf.cell(0, 5, clean_text("  Actionable Tasks:"), ln=True)
+        pdf.set_x(15)
+        pdf.cell(185, 5, clean_text("Actionable Tasks:"), ln=True)
         pdf.set_font("Arial", "", 9)
         for task in week_item.get("actionable_tasks", []) or week_item.get("tasks", []):
-            pdf.multi_cell(0, 5, clean_text(f"    - {task}"))
+            pdf.set_x(20)
+            pdf.multi_cell(180, 5, clean_text(f"- {task}"))
             
         pdf.set_font("Arial", "B", 9)
-        pdf.cell(0, 5, clean_text("  Suggested Resources:"), ln=True)
+        pdf.set_x(15)
+        pdf.cell(185, 5, clean_text("Suggested Resources:"), ln=True)
         pdf.set_font("Arial", "", 9)
         for res in week_item.get("suggested_resources", []) or week_item.get("resources", []):
-            pdf.multi_cell(0, 5, clean_text(f"    - {res}"))
+            pdf.set_x(20)
+            pdf.multi_cell(180, 5, clean_text(f"- {res}"))
         pdf.ln(3)
         
     # Recruiter Tip Section
     pdf.set_font("Arial", "B", 11)
-    pdf.set_text_color(113, 63, 18)  # Warm amber
-    pdf.cell(0, 8, clean_text("Recruiter Tip"), ln=True)
+    pdf.set_text_color(113, 63, 18)
+    pdf.set_x(10)
+    pdf.cell(190, 8, clean_text("Recruiter Tip"), ln=True)
     pdf.set_font("Arial", "", 10)
     pdf.set_text_color(15, 23, 42)
     
     tip = result.get("interview_tip") or result.get("tip") or "Highlight transferable skills."
-    pdf.multi_cell(0, 6, clean_text(tip))
+    pdf.set_x(15)
+    pdf.multi_cell(185, 6, clean_text(tip))
     
     return pdf.output()
 
