@@ -111,7 +111,10 @@ def generate_pdf_report(result):
     tip = result.get("interview_tip") or result.get("tip") or "Highlight transferable skills."
     pdf.multi_cell(180, 5, clean_text(tip))
     
-    return pdf.output(dest='S').encode('latin1', errors='replace')
+    output = pdf.output(dest='S')
+    if isinstance(output, str):
+        return output.encode('latin1', errors='replace')
+    return bytes(output)
 
 def analyze_resume(resume_text, job_description):
     """Sends the resume and JD to Groq using our prompt architecture."""
