@@ -4,6 +4,7 @@ import streamlit as st
 from groq import Groq
 from dotenv import load_dotenv
 import PyPDF2
+from fpdf import FPDF
 
 # Load environment variables
 load_dotenv()
@@ -35,10 +36,80 @@ def extract_text_from_pdf(pdf_file):
             text += extracted + "\n"
     return text
 
+def generate_pdf_report(result):
+    """Generates a downloadable PDF report from the analysis result."""
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    
+    # Title
+    pdf.set_font("Arial", "B", 18)
+    pdf.cell(0, 10, "CareerLens AI - Upskilling Roadmap", ln=True, align="C")
+    pdf.ln(5)
+    
+    # Match Score
+    match_pct = (
+        result.get("match_percentage") 
+        or result.get("match_score") 
+        or result.get("percentage") 
+        or 0
+    )
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(0, 10, f"Resume Match Score: {match_pct}%", ln=True)
+    pdf.ln(5)
+    
+    # Core Strengths
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(0, 8, "Core Strengths:", ln=True)
+    pdf.set_font("Arial", "", 10)
+    strengths = result.get("core_strengths") or result.get("strengths") or []
+    for s in strengths:
+        pdf.multi_cell(0, 6, f"- {s}")
+    pdf.ln(5)
+    
+    # Critical Gaps
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(0, 8, "Critical Gaps:", ln=True)
+    pdf.set_font("Arial", "", 10)
+    gaps = result.get("critical_gaps") or result.get("gaps") or []
+    for g in gaps:
+        pdf.multi_cell(0, 6, f"- {g}")
+    pdf.ln(5)
+    
+    # Roadmap
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(0, 8, "Week-by-Week Upskilling Roadmap:", ln=True)
+    roadmap = result.get("upskilling_roadmap") or result.get("roadmap") or []
+    for week_item in roadmap:
+        w_num = week_item.get('week') or week_item.get('week_number') or "1"
+        focus = week_item.get('focus_area') or week_item.get('focus') or "General"
+        
+        pdf.set_font("Arial", "B", 10)
+        pdf.cell(0, 6, f"Week {w_num}: {focus}", ln=True)
+        
+        pdf.set_font("Arial", "", 9)
+        pdf.multi_cell(0, 5, "Actionable Tasks:")
+        for task in week_item.get("actionable_tasks", []) or week_item.get("tasks", []):
+            pdf.multi_cell(0, 5, f"   * {task}")
+            
+        pdf.multi_cell(0, 5, "Suggested Resources:")
+        for res in week_item.get("suggested_resources", []) or week_item.get("resources", []):
+            pdf.multi_cell(0, 5, f"   * {res}")
+        pdf.ln(4)
+        
+    # Recruiter Tip
+    pdf.set_font("Arial", "B", 11)
+    pdf.cell(0, 8, "Recruiter Tip:", ln=True)
+    pdf.set_font("Arial", "", 10)
+    tip = result.get("interview_tip") or result.get("tip") or "Highlight transferable skills."
+    pdf.multi_cell(0, 6, tip)
+    
+    return pdf.output(dest='S').encode('latin1', errors='replace')
+
 def analyze_resume(resume_text, job_description):
     """Sends the resume and JD to Groq using our prompt architecture."""
     if not client:
-        return None, "Groq API key missing. Please check your environment variables or Streamlit secrets."
+        return None, "Groq API key missing. Please check your environment variables."
         
     system_prompt = load_system_prompt()
     
@@ -75,7 +146,7 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("📋 Target Job Description")
-    jd_input = st.text_area("Paste the job description here...", height=300, placeholder="Looking for a Backend Engineer or Clinical Coordinator...")
+    jd_input = st.text_area("Paste the job description here...", height=300, placeholder="Looking for an Engineer or Specialist...")
 
 with col2:
     st.subheader("📄 Candidate Resume")
@@ -102,7 +173,7 @@ if st.button("Generate Upskilling Roadmap 🚀", type="primary"):
             else:
                 st.success("Analysis Complete!")
                 
-                # Defensively parse JSON keys for cross-profession compatibility
+                # Display Match Score on UI
                 match_pct = (
                     result.get("match_percentage") 
                     or result.get("match_score") 
@@ -135,7 +206,7 @@ if st.button("Generate Upskilling Roadmap 🚀", type="primary"):
                     for gap in gaps:
                         st.markdown(f"- {gap}")
                 
-                # Roadmap Section
+                # Roadmap Section on UI
                 roadmap = (
                     result.get("upskilling_roadmap") 
                     or result.get("roadmap") 
@@ -155,7 +226,7 @@ if st.button("Generate Upskilling Roadmap 🚀", type="primary"):
                         for resource in week_item.get("suggested_resources", []) or week_item.get("resources", []):
                             st.markdown(f"- {resource}")
                 
-                # Interview Tip & Download Report
+                # Interview Tip & PDF Download
                 st.markdown("---")
                 tip = (
                     result.get("interview_tip") 
@@ -165,10 +236,11 @@ if st.button("Generate Upskilling Roadmap 🚀", type="primary"):
                 )
                 st.info(f"💡 **Recruiter Tip:** {tip}")
                 
-                json_string = json.dumps(result, indent=4)
+                # Generate and offer PDF download button
+                pdf_bytes = generate_pdf_report(result)
                 st.download_button(
-                    label="📥 Download Roadmap as JSON",
-                    data=json_string,
-                    file_name="career_lens_roadmap.json",
-                    mime="application/json"
+                    label="📥 Download Roadmap as PDF Report",
+                    data=pdf_bytes,
+                    file_name="career_lens_roadmap.pdf",
+                    mime="application/pdf"
                 )
