@@ -16,7 +16,7 @@ st.set_page_config(
 )
 
 # Initialize Groq client
-api_key = os.getenv("OPENAI_API_KEY") or os.getenv("GROQ_API_KEY")
+api_key = os.getenv("GROQ_API_KEY")
 client = Groq(api_key=api_key) if api_key else None
 
 def load_system_prompt():
@@ -38,7 +38,7 @@ def extract_text_from_pdf(pdf_file):
 def analyze_resume(resume_text, job_description):
     """Sends the resume and JD to Groq using our prompt architecture."""
     if not client:
-        return None, "API key missing. Please check your .env file."
+        return None, "Groq API key missing. Please check your environment variables or Streamlit secrets."
         
     system_prompt = load_system_prompt()
     
@@ -75,11 +75,10 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("📋 Target Job Description")
-    jd_input = st.text_area("Paste the job description here...", height=300, placeholder="Looking for a Backend Engineer...")
+    jd_input = st.text_area("Paste the job description here...", height=300, placeholder="Looking for a Backend Engineer or Clinical Coordinator...")
 
 with col2:
     st.subheader("📄 Candidate Resume")
-    # Added option to upload a PDF or paste text
     upload_option = st.radio("Choose input method:", ["Upload Resume (PDF)", "Paste Text Summary"])
     
     resume_input = ""
@@ -103,39 +102,69 @@ if st.button("Generate Upskilling Roadmap 🚀", type="primary"):
             else:
                 st.success("Analysis Complete!")
                 
-                # Display Match Score
-                match_pct = result.get("match_percentage", 0)
+                # Defensively parse JSON keys for cross-profession compatibility
+                match_pct = (
+                    result.get("match_percentage") 
+                    or result.get("match_score") 
+                    or result.get("percentage") 
+                    or 0
+                )
                 st.metric(label="Resume Match Score", value=f"{match_pct}%")
                 
-                # Core Strengths & Critical Gaps
+                strengths = (
+                    result.get("core_strengths") 
+                    or result.get("strengths") 
+                    or result.get("key_strengths") 
+                    or []
+                )
+                gaps = (
+                    result.get("critical_gaps") 
+                    or result.get("gaps") 
+                    or result.get("missing_skills") 
+                    or []
+                )
+                
                 m_col1, m_col2 = st.columns(2)
                 with m_col1:
                     st.markdown("#### ✅ Core Strengths")
-                    for strength in result.get("core_strengths", []):
+                    for strength in strengths:
                         st.markdown(f"- {strength}")
                 
                 with m_col2:
                     st.markdown("#### ⚠️ Critical Gaps")
-                    for gap in result.get("critical_gaps", []):
+                    for gap in gaps:
                         st.markdown(f"- {gap}")
                 
                 # Roadmap Section
+                roadmap = (
+                    result.get("upskilling_roadmap") 
+                    or result.get("roadmap") 
+                    or result.get("learning_roadmap") 
+                    or []
+                )
                 st.markdown("---")
                 st.markdown("### 🗺️ Week-by-Week Upskilling Roadmap")
-                for week_item in result.get("upskilling_roadmap", []):
-                    with st.expander(f"Week {week_item.get('week')}: {week_item.get('focus_area')}"):
+                for week_item in roadmap:
+                    week_num = week_item.get('week') or week_item.get('week_number') or "1"
+                    focus = week_item.get('focus_area') or week_item.get('focus') or "General Upskilling"
+                    with st.expander(f"Week {week_num}: {focus}"):
                         st.markdown("**Actionable Tasks:**")
-                        for task in week_item.get("actionable_tasks", []):
+                        for task in week_item.get("actionable_tasks", []) or week_item.get("tasks", []):
                             st.markdown(f"- {task}")
                         st.markdown("**Suggested Resources:**")
-                        for resource in week_item.get("suggested_resources", []):
+                        for resource in week_item.get("suggested_resources", []) or week_item.get("resources", []):
                             st.markdown(f"- {resource}")
                 
                 # Interview Tip & Download Report
                 st.markdown("---")
-                st.info(f"💡 **Recruiter Tip:** {result.get('interview_tip')}")
+                tip = (
+                    result.get("interview_tip") 
+                    or result.get("tip") 
+                    or result.get("recruiter_tip") 
+                    or "Focus on highlighting your transferable background during interviews."
+                )
+                st.info(f"💡 **Recruiter Tip:** {tip}")
                 
-                # Download Button for JSON Roadmap
                 json_string = json.dumps(result, indent=4)
                 st.download_button(
                     label="📥 Download Roadmap as JSON",
