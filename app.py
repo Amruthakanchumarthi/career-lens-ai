@@ -37,14 +37,15 @@ def extract_text_from_pdf(pdf_file):
     return text
 
 def generate_pdf_report(result):
-    """Generates a downloadable PDF report from the analysis result."""
+    """Generates a downloadable PDF report from the analysis result safely."""
     pdf = FPDF()
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.set_margins(15, 15, 15)  # Explicit 15mm margins
     
     # Title
-    pdf.set_font("Arial", "B", 18)
-    pdf.cell(0, 10, "CareerLens AI - Upskilling Roadmap", ln=True, align="C")
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(180, 10, "CareerLens AI - Upskilling Roadmap", ln=True, align="C")
     pdf.ln(5)
     
     # Match Score
@@ -54,55 +55,55 @@ def generate_pdf_report(result):
         or result.get("percentage") 
         or 0
     )
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(0, 10, f"Resume Match Score: {match_pct}%", ln=True)
-    pdf.ln(5)
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(180, 8, f"Resume Match Score: {match_pct}%", ln=True)
+    pdf.ln(3)
     
     # Core Strengths
-    pdf.set_font("Arial", "B", 12)
-    pdf.cell(0, 8, "Core Strengths:", ln=True)
+    pdf.set_font("Arial", "B", 11)
+    pdf.cell(180, 6, "Core Strengths:", ln=True)
     pdf.set_font("Arial", "", 10)
     strengths = result.get("core_strengths") or result.get("strengths") or []
     for s in strengths:
-        pdf.multi_cell(0, 6, f"- {s}")
-    pdf.ln(5)
+        pdf.multi_cell(180, 5, f"- {s}")
+    pdf.ln(3)
     
     # Critical Gaps
-    pdf.set_font("Arial", "B", 12)
-    pdf.cell(0, 8, "Critical Gaps:", ln=True)
+    pdf.set_font("Arial", "B", 11)
+    pdf.cell(180, 6, "Critical Gaps:", ln=True)
     pdf.set_font("Arial", "", 10)
     gaps = result.get("critical_gaps") or result.get("gaps") or []
     for g in gaps:
-        pdf.multi_cell(0, 6, f"- {g}")
-    pdf.ln(5)
+        pdf.multi_cell(180, 5, f"- {g}")
+    pdf.ln(3)
     
     # Roadmap
-    pdf.set_font("Arial", "B", 12)
-    pdf.cell(0, 8, "Week-by-Week Upskilling Roadmap:", ln=True)
+    pdf.set_font("Arial", "B", 11)
+    pdf.cell(180, 6, "Week-by-Week Upskilling Roadmap:", ln=True)
     roadmap = result.get("upskilling_roadmap") or result.get("roadmap") or []
     for week_item in roadmap:
         w_num = week_item.get('week') or week_item.get('week_number') or "1"
         focus = week_item.get('focus_area') or week_item.get('focus') or "General"
         
         pdf.set_font("Arial", "B", 10)
-        pdf.cell(0, 6, f"Week {w_num}: {focus}", ln=True)
+        pdf.cell(180, 5, f"Week {w_num}: {focus}", ln=True)
         
         pdf.set_font("Arial", "", 9)
-        pdf.multi_cell(0, 5, "Actionable Tasks:")
+        pdf.multi_cell(180, 5, "Actionable Tasks:")
         for task in week_item.get("actionable_tasks", []) or week_item.get("tasks", []):
-            pdf.multi_cell(0, 5, f"   * {task}")
+            pdf.multi_cell(180, 4, f"   * {task}")
             
-        pdf.multi_cell(0, 5, "Suggested Resources:")
+        pdf.multi_cell(180, 5, "Suggested Resources:")
         for res in week_item.get("suggested_resources", []) or week_item.get("resources", []):
-            pdf.multi_cell(0, 5, f"   * {res}")
-        pdf.ln(4)
+            pdf.multi_cell(180, 4, f"   * {res}")
+        pdf.ln(3)
         
     # Recruiter Tip
     pdf.set_font("Arial", "B", 11)
-    pdf.cell(0, 8, "Recruiter Tip:", ln=True)
+    pdf.cell(180, 6, "Recruiter Tip:", ln=True)
     pdf.set_font("Arial", "", 10)
     tip = result.get("interview_tip") or result.get("tip") or "Highlight transferable skills."
-    pdf.multi_cell(0, 6, tip)
+    pdf.multi_cell(180, 5, tip)
     
     return pdf.output(dest='S').encode('latin1', errors='replace')
 
